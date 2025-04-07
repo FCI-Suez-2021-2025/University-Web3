@@ -25,6 +25,18 @@ def print_professor(professor_id):
         print(f"Error retrieving professor: {str(e)}")
 
 
+def print_enrollments(student_id):
+    enrollments = university_datasource.get_student_enrollments(student_id)
+    if not enrollments:
+        print("No enrollments found")
+        return
+
+    print(f"\nEnrollments for Student {student_id}:")
+    for idx, enrollment in enumerate(enrollments, 1):
+        print(f"{idx}. Course: {enrollment['course_id']} ({enrollment['course_name']})")
+        print(f"   Taught by: {enrollment['professor_name']} ({enrollment['department']})")
+
+
 # Example 1: Add Professors
 # print("\n=== Adding Professors ===")
 # university_datasource.add_professor("Dr. Smith", "Computer Science")
@@ -47,7 +59,7 @@ def print_professor(professor_id):
 # print("\n=== Enrolling Student ===")
 # university_datasource.enroll_student_in_course(1, "CS101")
 # university_datasource.enroll_student_in_course(1, "MATH201")
-# print("Student enrolled in CS101 and MATH201")
+# print_enrollments(1)
 
 # Example 5: Update Student Information
 # print("\n=== Updating Student ===")
