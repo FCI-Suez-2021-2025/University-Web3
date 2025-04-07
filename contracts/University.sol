@@ -14,33 +14,33 @@ contract University {
         professorContract = Professor(_professorContractAddress);
     }
 
-    function addStudent(string memory _name, string memory _major, uint256 _year, uint256 _professorId) public onlyOwner {
+    function addStudent(string memory _name, string memory _major, uint256 _year, uint256 _professorId) public {
         professorContract.getProfessor(_professorId);
         studentContract.addStudent(_name, _major, _year, address(professorContract));
     }
 
-    function updateStudent(uint256 _studentId, string memory _name, string memory _major, uint256 _year, uint256 _professorId) public onlyOwner {
+    function updateStudent(uint256 _studentId, string memory _name, string memory _major, uint256 _year, uint256 _professorId) public {
         professorContract.getProfessor(_professorId);
         studentContract.updateStudent(_studentId, _name, _major, _year, address(professorContract));
     }
 
-    function deleteStudent(uint256 _studentId) public onlyOwner {
+    function deleteStudent(uint256 _studentId) public {
         studentContract.deleteStudent(_studentId);
     }
 
-    function getStudent(uint256 _studentId) public onlyOwner view returns (Student.StudentInfo memory) {
+    function getStudent(uint256 _studentId) public view returns (Student.StudentInfo memory) {
         return studentContract.getStudent(_studentId);
     }
 
-    function addProfessor(string memory _name, string memory _department) public onlyOwner {
+    function addProfessor(string memory _name, string memory _department) public {
         professorContract.addProfessor(_name, _department);
     }
 
-    function getProfessor(uint256 _professorId) public onlyOwner view returns (Professor.ProfessorInfo memory) {
+    function getProfessor(uint256 _professorId) public view returns (Professor.ProfessorInfo memory) {
         return professorContract.getProfessor(_professorId);
     }
 
-    function deleteProfessor(uint256 _professorId) public onlyOwner {
+    function deleteProfessor(uint256 _professorId) public {
         professorContract.deleteProfessor(_professorId);
     }
 
