@@ -13,6 +13,23 @@ class UniversityDataSource:
     def get_student(self, student_id):
         return self.university_contract.functions.getStudent(student_id).call()
 
+    def get_student_enrollments(self, student_id):
+        try:
+            course_ids, course_names, prof_names, departments = self.university_contract.functions.getStudentEnrollments(
+                student_id).call()
+            return [
+                {
+                    "course_id": cid,
+                    "course_name": cname,
+                    "professor": pname,
+                    "department": dept
+                }
+                for cid, cname, pname, dept in zip(course_ids, course_names, prof_names, departments)
+            ]
+        except Exception as e:
+            print(f"Error getting enrollments: {str(e)}")
+            return []
+
     def update_student(self, student_id, name, major, year, professor_id):
         self.university_contract.functions.updateStudent(
             student_id, 
