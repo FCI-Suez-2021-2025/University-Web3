@@ -1,8 +1,10 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 contract Professor {
     struct ProfessorInfo {
         uint256 id;
+        address professorAddress;
         string name;
         string department;
     }
@@ -15,7 +17,7 @@ contract Professor {
     }
 
     function addProfessor(string memory _name, string memory _department) public {
-        professors[nextId] = ProfessorInfo(nextId, _name, _department);
+        professors[nextId] = ProfessorInfo(nextId, msg.sender, _name, _department);
         nextId++;
     }
 

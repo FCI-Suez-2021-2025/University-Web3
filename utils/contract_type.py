@@ -2,6 +2,7 @@ from enum import Enum
 
 
 class ContractType(Enum):
-    STUDENT = "Student"
     PROFESSOR = "Professor"
+    STUDENT = "Student"
+    COURSE = "Course"
     UNIVERSITY = "University"
