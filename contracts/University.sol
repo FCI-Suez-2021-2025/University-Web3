@@ -1,27 +1,79 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 import "./Student.sol";
 import "./Professor.sol";
+import "./Course.sol";
 
 contract University {
     address payable public owner;
     Student public studentContract;
     Professor public professorContract;
+    Course public courseContract;
 
-    constructor(address _studentContractAddress, address _professorContractAddress) {
+    constructor(
+        address _studentContractAddress,
+        address _professorContractAddress,
+        address _courseContractAddress
+    ) {
         owner = payable(msg.sender);
         studentContract = Student(_studentContractAddress);
         professorContract = Professor(_professorContractAddress);
+        courseContract = Course(_courseContractAddress);
     }
 
-    function addStudent(string memory _name, string memory _major, uint256 _year, uint256 _professorId) public {
-        professorContract.getProfessor(_professorId);
-        studentContract.addStudent(_name, _major, _year, address(professorContract));
+    // Course Management
+    function createCourse(
+        string memory _courseId,
+        string memory _name,
+        uint256 _professorId
+    ) public {
+        courseContract.createCourse(_courseId, _name, _professorId);
     }
 
-    function updateStudent(uint256 _studentId, string memory _name, string memory _major, uint256 _year, uint256 _professorId) public {
-        professorContract.getProfessor(_professorId);
-        studentContract.updateStudent(_studentId, _name, _major, _year, address(professorContract));
+    // Reassign a course using its string ID
+    function reassignCourse(string memory _courseId, uint256 _newProfessorId) public {
+        courseContract.reassignCourse(_courseId, _newProfessorId);
+    }
+
+    function deleteCourse(string memory _courseId) public {
+        courseContract.deleteCourse(_courseId);
+    }
+
+    function addStudent(
+        string memory _name,
+        string memory _major,
+        uint256 _year,
+        uint256 _professorId
+    ) public {
+        Professor.ProfessorInfo memory prof = professorContract.getProfessor(_professorId);
+        studentContract.addStudent(_name, _major, _year, prof.professorAddress);
+    }
+
+    function updateStudent(
+        uint256 _studentId,
+        string memory _name,
+        string memory _major,
+        uint256 _year,
+        uint256 _professorId // Use 0 to keep the current professor
+    ) public {
+        address supervisorAddress;
+
+        if (_professorId > 0) {
+            Professor.ProfessorInfo memory prof = professorContract.getProfessor(_professorId);
+            supervisorAddress = prof.professorAddress;
+        } else {
+            // Keep the existing supervisor address if no new professor ID is provided
+            supervisorAddress = studentContract.getStudent(_studentId).academicSupervisorAddress;
+        }
+
+        studentContract.updateStudent(
+            _studentId,
+            _name,      // Pass empty string to keep the current name
+            _major,     // Pass empty string to keep the current major
+            _year,      // Pass 0 to keep the current year
+            supervisorAddress
+        );
     }
 
     function deleteStudent(uint256 _studentId) public {
@@ -30,6 +82,29 @@ contract University {
 
     function getStudent(uint256 _studentId) public view returns (Student.StudentInfo memory) {
         return studentContract.getStudent(_studentId);
+    }
+
+    // Enroll a student in a course
+    function enrollStudentInCourse(uint256 _studentId, string memory _courseId) public {
+        // Verify the course exists
+        courseContract.getCourse(_courseId);
+
+        // Enroll in Student and Course contracts
+        studentContract.enrollInCourse(_studentId, _courseId);
+        courseContract.enrollStudent(_studentId, _courseId);
+    }
+
+    // Remove a course from a student's list
+    function removeCourseFromStudent(uint256 _studentId, string memory _courseId) public {
+        // Remove from Student contract
+        studentContract.deleteCourseFromStudent(_studentId, _courseId);
+        // Remove from Course contract enrollment list
+        courseContract.unEnrollStudent(_studentId, _courseId);
+    }
+
+    // Remove all courses for a student
+    function clearAllCoursesForStudent(uint256 _studentId) public {
+        studentContract.deleteAllCoursesForStudent(_studentId);
     }
 
     function addProfessor(string memory _name, string memory _department) public {
