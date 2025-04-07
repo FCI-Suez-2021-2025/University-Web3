@@ -11,6 +11,13 @@ contract University {
     Professor public professorContract;
     Course public courseContract;
 
+    struct EnrollmentInfo {
+        string courseId;
+        string courseName;
+        string professorName;
+        string department;
+    }
+
     constructor(
         address _studentContractAddress,
         address _professorContractAddress,
@@ -29,6 +36,33 @@ contract University {
         uint256 _professorId
     ) public {
         courseContract.createCourse(_courseId, _name, _professorId);
+    }
+
+    function getStudentEnrollments(uint256 _studentId) public view returns (
+        string[] memory courseIds,
+        string[] memory courseNames,
+        string[] memory professorNames,
+        string[] memory departments
+    ) {
+        // Get course IDs from Student contract
+        string[] memory enrolled = studentContract.getEnrolledCourses(_studentId);
+
+        // Initialize arrays
+        courseIds = new string[](enrolled.length);
+        courseNames = new string[](enrolled.length);
+        professorNames = new string[](enrolled.length);
+        departments = new string[](enrolled.length);
+
+        // Populate data
+        for (uint256 i = 0; i < enrolled.length; i++) {
+            Course.CourseInfo memory course = courseContract.getCourse(enrolled[i]);
+            Professor.ProfessorInfo memory professor = professorContract.getProfessor(course.professorId);
+
+            courseIds[i] = course.id;
+            courseNames[i] = course.name;
+            professorNames[i] = professor.name;
+            departments[i] = professor.department;
+        }
     }
 
     // Reassign a course using its string ID

@@ -101,7 +101,7 @@ contract Student {
     }
 
     // Get all courses for a student
-    function getEnrolledCourses(uint256 _studentId) external view returns (string[] memory) {
-        return enrolledCourses[_studentId];
-    }
+    function getEnrolledCourses(uint256 _studentId) public view returns (string[] memory) {
+    return enrolledCourses[_studentId];
+}
 }
