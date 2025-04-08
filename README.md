@@ -1,4 +1,13 @@
-# 🎓 University-Web3
+<h1 align="center">🎓 University-Web3</h1>
+
+<div align="center">
+
+![GitHub Repo stars](https://img.shields.io/github/stars/FCI-Suez-2021-2025/University-Web3)
+![GitHub forks](https://img.shields.io/github/forks/FCI-Suez-2021-2025/University-Web3)
+![GitHub watchers](https://img.shields.io/github/watchers/FCI-Suez-2021-2025/University-Web3)
+![GitHub last commit](https://img.shields.io/github/last-commit/FCI-Suez-2021-2025/University-Web3)
+![Github Created At](https://img.shields.io/github/created-at/FCI-Suez-2021-2025/University-Web3?color=1a73e8)
+</div>
 
 ---
 
