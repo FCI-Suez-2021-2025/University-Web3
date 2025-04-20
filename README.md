@@ -15,6 +15,7 @@ Before running the project, you need to:
 {
     "node_url": "http://127.0.0.1:8545",
     "deployer_private_key": "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+    "deployer_address": "",
     "contracts": {
         "Professor": "",
         "Student": "",

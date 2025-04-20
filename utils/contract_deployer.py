@@ -1,15 +1,15 @@
 import os
 import json
 
+from utils import deployer_private_key
 from utils.contract_type import ContractType
 from utils.project_components import get_abi_dir, get_bin_dir, get_web3, get_config, update_config
 
 
 def deploy_contract(contract_type: ContractType, constructor_args=()):
     w3 = get_web3()
-    deployer_private_key = get_config()["deployer_private_key"]
     contract_name = contract_type.value
-    deployer_account = w3.eth.account.from_key(deployer_private_key).address
+    deployer_account = get_config()["deployer_address"]
 
     abi_path = os.path.join(get_abi_dir(), f"{contract_name}.abi")
     bin_path = os.path.join(get_bin_dir(), f"{contract_name}.bin")
