@@ -23,3 +23,13 @@ with open(CONFIG_PATH, "r") as config_file:
 
 # Web3 setup
 web3 = Web3(Web3.HTTPProvider(config["node_url"]))
+
+# Get deployer address
+deployer_private_key = config["deployer_private_key"]
+deployer_account = web3.eth.account.from_key(deployer_private_key).address
+
+# Update config with deployer address
+config["deployer_address"] = deployer_account
+
+with open(CONFIG_PATH, "w") as config_file:
+    json.dump(config, config_file, indent=4)
