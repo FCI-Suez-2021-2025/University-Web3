@@ -58,3 +58,9 @@ anvil
 This runs a local node at `http://127.0.0.1:8545` and prints out a list of pre-funded private keys and addresses. Choose one private key and paste it into your `config.json`.
 
 ---
+
+### ⚠️ Important Note for Windows users
+
+Use any bash terminal like Git Bash or WSL Terminal to install and run foundryup and anvil
+
+---
