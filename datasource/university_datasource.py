@@ -338,7 +338,7 @@ class UniversityDataSource:
         Returns:
             Transaction hash or receipt
         """
-        if not course_id or not name or professor_id <= 0:
+        if not course_id or not name or professor_id <= 0 or course_id <= 0:
             raise ValueError("Invalid course data")
 
         tx_params = self._get_transaction_params(gas, gas_price)
@@ -354,7 +354,7 @@ class UniversityDataSource:
         Returns:
             Transaction hash or receipt
         """
-        if not course_id:
+        if not course_id or course_id <= 0:
             raise ValueError("Course ID is required")
 
         tx_params = self._get_transaction_params(gas, gas_price)
@@ -370,7 +370,7 @@ class UniversityDataSource:
         Returns:
             Transaction hash or receipt
         """
-        if not course_id or new_professor_id <= 0:
+        if not course_id or new_professor_id <= 0 or course_id <= 0:
             raise ValueError("Invalid course or professor data")
 
         tx_params = self._get_transaction_params(gas, gas_price)
@@ -386,8 +386,8 @@ class UniversityDataSource:
         Returns:
             Transaction hash or receipt
         """
-        if not course_id:
-            raise ValueError("Course ID is required")
+        if not course_id or course_id <= 0:
+            raise ValueError("Invalid Course ID")
 
         tx_params = self._get_transaction_params(gas, gas_price)
         function_call = self.university_contract.functions.deleteCourse(course_id)
@@ -400,8 +400,8 @@ class UniversityDataSource:
         Returns:
             Course information dictionary
         """
-        if not course_id:
-            raise ValueError("Course ID is required")
+        if not course_id or course_id <= 0:
+            raise ValueError("Invalid Course ID")
 
         try:
             # This requires direct access to the Course contract
@@ -473,7 +473,7 @@ class UniversityDataSource:
         Returns:
             Transaction hash or receipt
         """
-        if student_id <= 0 or not course_id:
+        if student_id <= 0 or not course_id or course_id <= 0 or not student_id:
             raise ValueError("Valid student ID and course ID are required")
 
         tx_params = self._get_transaction_params(gas, gas_price)
@@ -489,7 +489,7 @@ class UniversityDataSource:
         Returns:
             Transaction hash or receipt
         """
-        if not student_ids or not course_id:
+        if not student_ids or not course_id or course_id <= 0 or student_ids <= 0:
             raise ValueError("Student IDs list and course ID are required")
 
         tx_params = self._get_transaction_params(gas, gas_price)
@@ -505,7 +505,7 @@ class UniversityDataSource:
         Returns:
             Transaction hash or receipt
         """
-        if student_id <= 0 or not course_id:
+        if student_id <= 0 or not course_id or not student_id or course_id <= 0:
             raise ValueError("Valid student ID and course ID are required")
 
         tx_params = self._get_transaction_params(gas, gas_price)
@@ -521,8 +521,8 @@ class UniversityDataSource:
         Returns:
             Transaction hash or receipt
         """
-        if student_id <= 0:
-            raise ValueError("Student ID must be positive")
+        if student_id <= 0 or not student_id:
+            raise ValueError("Invalid student ID")
 
         tx_params = self._get_transaction_params(gas, gas_price)
         function_call = self.university_contract.functions.clearAllCoursesForStudent(student_id)
