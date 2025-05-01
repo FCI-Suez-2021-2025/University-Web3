@@ -1,35 +1,17 @@
 from web3 import Web3
-from typing import Optional, List, Dict, Union, Any, Tuple
-from utils.contract_finder import get_contract
+from typing import Optional, List, Dict, Union, Any
+from utils.contract_loader import get_contract
 from utils.contract_type import ContractType
 import asyncio
 
 
 class UniversityDataSource:
-    """
-    Enhanced wrapper for interacting with the University smart contract.
-    Provides comprehensive access to University contract functions with
-    improved error handling, transaction management, and additional features.
-    """
 
     def __init__(self, account_address: Optional[str] = None, admin_address: Optional[str] = None, web3_provider=None):
-        """
-        Initialize the University data source.
-
-        Args:
-            account_address: The address to use for transactions (optional)
-            admin_address: The admin address for admin-only functions (optional)
-            web3_provider: Custom Web3 provider instance (optional)
-        """
         self.web3 = web3_provider or Web3()
         self.university_contract = get_contract(ContractType.UNIVERSITY)
         self.account_address = account_address
         self.admin_address = admin_address
-
-        # Store contract references for direct access if needed
-        self.student_contract_address = self.university_contract.functions.studentContract().call()
-        self.professor_contract_address = self.university_contract.functions.professorContract().call()
-        self.course_contract_address = self.university_contract.functions.courseContract().call()
 
         # Cache contract ABI for event listeners
         self.contract_events = self.university_contract.events
@@ -142,7 +124,7 @@ class UniversityDataSource:
             print(f"Error getting student {student_id}: {str(e)}")
             raise
 
-    def get_student_enrollments(self, student_id: int) -> List[Dict[str, str]]:
+    def get_student_enrollments(self, student_id: int) -> List[Dict[str, Any]]:
         """
         Get all courses a student is enrolled in
 
@@ -150,16 +132,15 @@ class UniversityDataSource:
             List of enrollment information dictionaries
         """
         try:
-            course_ids, course_names, prof_names, departments = self.university_contract.functions.getStudentEnrollments(
-                student_id).call()
+            enrollments = self.university_contract.functions.getStudentEnrollments(student_id).call()
             return [
                 {
-                    "course_id": cid,
-                    "course_name": cname,
-                    "professor": pname,
-                    "department": dept
+                    "student_id": e[0],
+                    "course_id": e[1],
+                    "mark": e[2],
+                    "active": e[3]
                 }
-                for cid, cname, pname, dept in zip(course_ids, course_names, prof_names, departments)
+                for e in enrollments
             ]
         except Exception as e:
             print(f"Error getting enrollments for student {student_id}: {str(e)}")
@@ -404,17 +385,12 @@ class UniversityDataSource:
             raise ValueError("Course ID is required")
 
         try:
-            # This requires direct access to the Course contract
-            course_contract = get_contract(ContractType.COURSE)
-            course_data = course_contract.functions.getCourse(course_id).call()
-
-            # Convert tuple to dictionary
+            course_data = self.university_contract.functions.getCourse(course_id).call()
             return {
                 "id": course_data[0],
                 "name": course_data[1],
                 "professorId": course_data[2],
-                "studentCount": course_data[3],
-                "active": course_data[4]
+                "active": course_data[3]
             }
         except Exception as e:
             print(f"Error getting course {course_id}: {str(e)}")
@@ -443,11 +419,7 @@ class UniversityDataSource:
             List of course information dictionaries
         """
         try:
-            # This requires direct access to the Course contract
-            course_contract = get_contract(ContractType.COURSE)
-            courses_data = course_contract.functions.getCoursesByProfessor(professor_id).call()
-
-            # Convert tuples to dictionaries
+            courses_data = self.university_contract.functions.getCoursesByProfessor(professor_id).call()
             return [
                 {
                     "id": course[0],
@@ -528,20 +500,55 @@ class UniversityDataSource:
         function_call = self.university_contract.functions.clearAllCoursesForStudent(student_id)
         return self._handle_transaction(function_call, tx_params, wait_for_receipt)
 
-    def get_enrolled_students(self, course_id: str) -> List[int]:
+    def get_course_enrollments(self, course_id: str) -> List[Dict[str, Any]]:
         """
-        Get all students enrolled in a course
+        Get all enrollments for a specific course
 
         Returns:
-            List of student IDs
+            List of enrollment dictionaries with student info and marks
         """
+        if not course_id:
+            raise ValueError("Course ID is required")
+
         try:
-            # This requires direct access to the Course contract
-            course_contract = get_contract(ContractType.COURSE)
-            return course_contract.functions.getEnrolledStudents(course_id).call()
+            enrollments = self.university_contract.functions.getCourseEnrollments(course_id).call()
+            return [
+                {
+                    "student_id": e[0],
+                    "student_name": e[1],
+                    "mark": e[2],
+                    "active": e[3]
+                }
+                for e in enrollments
+            ]
         except Exception as e:
-            print(f"Error getting enrolled students for course {course_id}: {str(e)}")
+            print(f"Error getting enrollments for course {course_id}: {str(e)}")
             return []
+
+    def update_student_mark(self, student_id: int, course_id: str, mark: int,
+                            gas: Optional[int] = None, gas_price: Optional[int] = None,
+                            wait_for_receipt: bool = False) -> Union[str, Dict[str, Any]]:
+        """
+        Update a student's mark in a course
+
+        Args:
+            student_id: Student ID
+            course_id: Course ID
+            mark: New mark (0-100)
+
+        Returns:
+            Transaction hash or receipt
+        """
+        if student_id <= 0 or not course_id:
+            raise ValueError("Valid student ID and course ID are required")
+        if mark < 0 or mark > 100:
+            raise ValueError("Mark must be between 0 and 100")
+
+        tx_params = self._get_transaction_params(gas, gas_price)
+        function_call = self.university_contract.functions.updateStudentMark(
+            student_id, course_id, mark
+        )
+        return self._handle_transaction(function_call, tx_params, wait_for_receipt)
 
     # ==================== ADMIN OPERATIONS ====================
 
