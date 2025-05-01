@@ -1,36 +1,39 @@
-from utils.contract_deployer import deploy_contract
+from utils import get_config, update_config
+from utils.contract_deployer import deploy_with_dependencies
 from utils.contract_type import ContractType
-from utils.project_components import get_config
+from utils.contract_verifier import verify_contract
+
+_config = get_config()
+_initialized = False
 
 
-contracts = get_config().get("contracts")
+def _initialize_contract_system():
+    """Initialize the contract system on first import"""
+    global _initialized
+    if _initialized:
+        return
 
-if contracts:
-    # Deploy dependencies first
-    for contract_type in [ContractType.PROFESSOR, ContractType.STUDENT]:
-        if contracts.get(contract_type.value) == "":
-            deploy_contract(contract_type)
+    print("Initializing contract system...")
 
-    for contract_type in [ContractType.COURSE, ContractType.UNIVERSITY]:
-        # Deploy Course contract
-        if contracts.get(ContractType.COURSE.value) == "":
-            deploy_contract(
-                contract_type=ContractType.COURSE,
-                constructor_args=(
-                    contracts[ContractType.PROFESSOR.value],
-                    contracts[ContractType.STUDENT.value]
-                )
-            )
+    # 1. Deploy core contracts
+    required_contracts = [
+        ContractType.PROFESSOR,
+        ContractType.STUDENT,
+        ContractType.COURSE,
+        ContractType.ENROLLMENT,
+        ContractType.UNIVERSITY
+    ]
 
-        # Deploy University contract with all dependencies
-        elif contracts.get(ContractType.UNIVERSITY.value) == "":
-            deploy_contract(
-                contract_type=ContractType.UNIVERSITY,
-                constructor_args=(
-                    contracts[ContractType.STUDENT.value],
-                    contracts[ContractType.PROFESSOR.value],
-                    contracts[ContractType.COURSE.value]
-                )
-            )
-else:
-    raise ValueError("No contracts found in config.")
+    for contract_type in required_contracts:
+        contract_name = contract_type.value
+        if not _config['contracts'].get(contract_name) or not verify_contract(_config['contracts'][contract_name]):
+            print(f"Initializing {contract_name} contract...")
+            deploy_with_dependencies(contract_type)
+
+    update_config()
+    _initialized = True
+    print("Contract system initialized")
+
+
+# Run initialization when module is imported
+_initialize_contract_system()
