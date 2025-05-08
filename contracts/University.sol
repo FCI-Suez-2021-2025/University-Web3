@@ -175,6 +175,10 @@ contract University {
         enrollmentContract.enrollStudent(_studentId, _courseId);
     }
 
+    function updateStudentMark(uint256 _studentId, string memory _courseId, uint8 _mark) external onlyAuthorized {
+        enrollmentContract.updateMark(_studentId, _courseId, _mark);
+    }
+
     function removeCourseFromStudent(uint256 _studentId, string memory _courseId) external onlyAuthorized {
         require(studentContract.isActive(_studentId), "Invalid student");
         require(courseContract.exists(_courseId), "Invalid course");
